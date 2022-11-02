@@ -5,12 +5,13 @@
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack --config xrx.webpack.config",
-    "start": "webpack-dev-server --config xrx.webpack.config"
+    "build": "cross-env NODE_ENV=production webpack --config xrx.webpack.config",
+    "start": "cross-env NODE_ENV=development webpack-dev-server --config xrx.webpack.config"
   },
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "html-webpack-plugin": "^5.5.0",
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0",
