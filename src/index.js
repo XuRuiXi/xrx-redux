@@ -1,8 +1,11 @@
-const createStore = (reducer, state = '', enhancer) => {
-  let listener = [];
+
+const createStore = (reducer, _state, enhancer) => {
+  let state = _state ?? '';
+
   if (enhancer) {
     return enhancer(createStore)(reducer, state);
   }
+  let listener = [];
   const dispatch = (action) => {
     const newState = reducer(state, action);
     state = newState;
@@ -21,15 +24,17 @@ const createStore = (reducer, state = '', enhancer) => {
 
 const applyMiddleware = (...middlewares) => (createStore) => (reducer, state) => {
   const store = createStore(reducer, state);
-  let dispatch = store.dispatch;
+  let dispatch = undefined;
   const midApi = {
     getState: store.getState,
-    dispatch,
+    dispatch: (...rs) => {
+      return dispatch(...rs)
+    },
   }
   // 每一个中间件都接收 getState 和 dispatch 方法
   const middlewareChain = middlewares.map((mid) => mid(midApi));
   // 将中间件组合成一个函数进行调用
-  dispatch = compose(middlewareChain)(dispatch);
+  dispatch = compose(middlewareChain)(store.dispatch);
 
   return Object.assign(store, {
     dispatch,
@@ -37,6 +42,7 @@ const applyMiddleware = (...middlewares) => (createStore) => (reducer, state) =>
 };
 
 var compose = (mid) => {
+  // 如果没有中间件，直接返回参数(dispatch)
   if (mid.length === 0) return args => args
   // 如果只有一个中间件，则直接返回
   if (mid.length === 1) return mid[0]
