@@ -1,6 +1,9 @@
-import { createStore, applyMiddleware } from "./index";
-import thunk from './redux-thunk';
-import xrxpromise from './redux-xrx-promise';
+import { createStore, applyMiddleware, combineReducers } from "./index";
+// import redux from 'redux';
+import thunk from 'xrx-redux-thunk';
+import xrxpromise from 'xrx-redux-promise';
+
+// const store1 = redux.createStore()
 
 const asyncAdd = () => new Promise((resolve) => {
   setTimeout(() => {
@@ -23,6 +26,20 @@ const reducer = (state, action) => {
   }
 }
 
+const reducer2 = (state, action) => {
+  switch(action.type) {
+    case 'MINUS':
+      return state - action.payload;
+    default:
+      return state;
+  }
+}
+
+// const reducers = combineReducers({
+//   reducer,
+//   reducer2,
+// })
+
 const store = createStore(reducer, 0, applyMiddleware(xrxpromise, thunk));
 
 store.subscribe(state => {
@@ -33,7 +50,6 @@ store.dispatch({
   type: 'ADD',
   payload: 1,
 });
-
 
 store.dispatch((dispatch) => {
   setTimeout(() => {

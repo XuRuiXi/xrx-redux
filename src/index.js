@@ -36,9 +36,10 @@ const applyMiddleware = (...middlewares) => (createStore) => (reducer, state) =>
   // 将中间件组合成一个函数进行调用
   dispatch = compose(middlewareChain)(store.dispatch);
 
-  return Object.assign(store, {
-    dispatch,
-  });
+  return {
+    ...store,
+    dispatch
+  };
 };
 
 var compose = (mid) => {
@@ -48,9 +49,23 @@ var compose = (mid) => {
   if (mid.length === 1) return mid[0]
   // 将中间件聚合成 (...arg) => f1(f2(f3(...args)) 形式并返回
   return mid.reduce((l, r) => (...args) => l(r(...args)));
+};
+
+const combineReducers = reducers => {
+  return (state, action) => {
+    let newState = {};
+    for (let key in reducers) {
+      if (reducers.hasOwnProperty(key)) {
+        const reducer = reducers[key];
+        newState[key] = reducer(state[key], action);
+      }
+    }
+    return newState;
+  }
 }
 
 export {
   createStore,
   applyMiddleware,
+  combineReducers,
 };

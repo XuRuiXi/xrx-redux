@@ -1,18 +1,18 @@
 ### 实现redux核心功能（createStore, applyMiddleware）
 ---
 #### 开始之前，需要了解几个概念
-- **store**
+- **store**  
 store是通过createStore创建的仓库,主要提供三个方法：
 getState：获取state
 dispatch：接收action，然后通过reducer处理state
 subscribe：注册监听器
-- **state**
+- **state**  
 存储在store里面的数据，只能通过getState获取
-- **action**
+- **action**  
 一个对象，表示一种行为。reducer根据action处理state
-- **reducer**
+- **reducer**  
 用户定义的用来处理state的函数。规定了固定接收state，action。以及return最新的state
-- **dispatch**
+- **dispatch**  
 接收action，触发reducer
 
 #### createStore初现
