@@ -1,6 +1,13 @@
 
-const createStore = (reducer, _state, enhancer) => {
-  let state = _state ?? '';
+const createStore = (reducer, preloadedState, enhancer) => {
+  let state;
+  // 判断不传初始state的情况
+  if (typeof preloadedState === 'function' && typeof enhancer === 'undefined') {
+    state = undefined;;
+    enhancer = preloadedState;
+  } else {
+    state = preloadedState;
+  }
 
   if (enhancer) {
     return enhancer(createStore)(reducer, state);
@@ -9,7 +16,7 @@ const createStore = (reducer, _state, enhancer) => {
   const dispatch = (action) => {
     const newState = reducer(state, action);
     state = newState;
-    listener.forEach(listen => listen(newState));
+    listener.forEach(listen => listen());
   };
   const subscribe = fn => {
     if (listener.indexOf(fn) === -1) listener.push(fn);
@@ -51,16 +58,67 @@ var compose = (mid) => {
   return mid.reduce((l, r) => (...args) => l(r(...args)));
 };
 
+
+const validateReducers = (reducers) => {
+  if (typeof reducers !== 'object') {
+    throw new TypeError('reducers 必须是一个对象')
+  }
+
+  if (!isPlanObject) {
+    throw new TypeError('reducers 必须是一个平面对象')
+  }
+
+  // 构造一个随机action，验证reducer返回的不能是undefined
+  for (let key in reducers) {
+    if (reducers.hasOwnProperty(key)) {
+      const reducer = reducers[key];
+      let state = reducer(undefined, {
+        type: ActionTypes.INIT()
+      })
+      // null不绝对等于undefined
+      if (state === undefined) {
+          throw new TypeError("reducers must not return undefined");
+      }
+      // 再次判断是否返回undefined
+      state = reducer(undefined, {
+          type: ActionTypes.UNKNOWN()
+      })
+      if (state === undefined) {
+          throw new TypeError("reducers must not return undefined");
+      }
+    }
+  }
+}
+
+const isPlanObject = reducers => {
+  return Reflect.getPrototypeOf(reducers) !== Object.prototype
+}
+
+
+const getRandomString = length => { 
+  return Math.random().toString(36).substr(2, length).split("").join(".")
+}
+
+
+const ActionTypes = {
+  INIT() {
+    return `@@redux/INIT${getRandomString(6)}`
+  },
+  UNKNOWN(){
+    return `@@redux/PROBE_UNKNOWN_ACTION${getRandomString(6)}`
+  }
+}
+
 const combineReducers = reducers => {
-  return (state, action) => {
-    let newState = {};
+  validateReducers(reducers);
+  return (state = {}, action) => {
     for (let key in reducers) {
       if (reducers.hasOwnProperty(key)) {
         const reducer = reducers[key];
-        newState[key] = reducer(state[key], action);
+        state[key] = reducer(state[key], action);
       }
     }
-    return newState;
+    return state;
   }
 }
 

@@ -163,7 +163,83 @@ compose执行之后的得到的
 ```javascript
 dispatch = (...arg) => f1(f2(f3(...arg)))(store.dispatch)
 ```
-传入store.dispatch执行，结合中间件的格式来看，f1的返回结果是一个函数，缓存了一个next，这个f1的next就是f2的返回也是一个函数，缓存了一个next，这个f2的next就是f3的返回结果，而f3的返回结果也是个函数，缓存了一个next，而store.dispatch就是f3的入参next，最后dispatch就等于f1()的执行结果（函数），接收action。
+传入store.dispatch执行，结合中间件的格式来看，f1的返回结果是一个函数，缓存了一个next，这个f1的next就是f2的返回也是一个函数，缓存了一个next，这个f2的next就是f3的返回结果，而f3的返回结果也是个函数，缓存了一个next，而store.dispatch就是f3的入参next，最后dispatch就等于f1()的执行结果（函数），接收action。  
+
+---
+
+
+#### **combineReducers**
+
+在大中型项目中，操作比较复杂，数据结构也比较复杂，因此，需要对reducer进行细分。redux提供了方法，可以帮助我们更加方便的合并reducer，combineReducers会合并reducer，得到一个新的reducer，该新的reducer管理一个对象，该对象中的每一个属性交给对应的reducer管理。
+
+代码很简单，组装reducers，返回一个reducer，数据使用一个对象表示，对象的属性名与传递的参数对象保持一致，主要是需要对传入的reducer进行检验
+
+
+```javascript
+const validateReducers = (reducers) => {
+  if (typeof reducers !== 'object') {
+    throw new TypeError('reducers 必须是一个对象')
+  }
+
+  if (!isPlanObject) {
+    throw new TypeError('reducers 必须是一个平面对象')
+  }
+
+  // 构造一个随机action，验证reducer返回的不能是undefined
+  for (let key in reducers) {
+    if (reducers.hasOwnProperty(key)) {
+      const reducer = reducers[key];
+      let state = reducer(undefined, {
+        type: ActionTypes.INIT()
+      })
+      // null不绝对等于undefined
+      if (state === undefined) {
+          throw new TypeError("reducers must not return undefined");
+      }
+      // 再次判断是否返回undefined
+      state = reducer(undefined, {
+          type: ActionTypes.UNKNOWN()
+      })
+      if (state === undefined) {
+          throw new TypeError("reducers must not return undefined");
+      }
+    }
+  }
+}
+
+const isPlanObject = reducers => {
+  return Reflect.getPrototypeOf(reducers) !== Object.prototype
+}
+
+
+const getRandomString = length => { 
+  return Math.random().toString(36).substr(2, length).split("").join(".")
+}
+
+
+const ActionTypes = {
+  INIT() {
+    return `@@redux/INIT${getRandomString(6)}`
+  },
+  UNKNOWN(){
+    return `@@redux/PROBE_UNKNOWN_ACTION${getRandomString(6)}`
+  }
+}
+
+const combineReducers = reducers => {
+  validateReducers(reducers);
+  return (state = {}, action) => {
+    for (let key in reducers) {
+      if (reducers.hasOwnProperty(key)) {
+        const reducer = reducers[key];
+        state[key] = reducer(state[key], action);
+      }
+    }
+    return state;
+  }
+}
+```
+
 
 #### **附件**
 
