@@ -2,7 +2,6 @@ import { createStore, applyMiddleware, combineReducers } from "./index";
 // import { legacy_createStore as createStore, applyMiddleware, combineReducers } from 'redux';
 import thunk from 'xrx-redux-thunk';
 import xrxpromise from 'xrx-redux-promise';
-
 const asyncAdd = () => new Promise((resolve) => {
   setTimeout(() => {
     resolve(3);
