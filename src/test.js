@@ -15,7 +15,6 @@ const asyncAdd2 = (n) => new Promise((resolve) => {
 });
 
 const reducer = (state = 0, action) => {
-  console.log(action);
   switch(action.type) {
     case 'ADD':
       return state + action.payload;

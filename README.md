@@ -139,7 +139,7 @@ const compose = (...mids) => {
 ```javascript
 const middleware = ({ dispatch, getState }) => (next) => (action) => {}
 ```
-中间件（middleware）前面的入参(dispatch, getState, next)通过applyMiddleware这个方法，传入了。
+中间件（middleware）通过applyMiddleware这个方法，传入了参数(dispatch, getState, next)
 
 ```javascript
 const midApi = {
