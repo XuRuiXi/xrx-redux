@@ -1,4 +1,4 @@
-### 实现redux核心功能（createStore, applyMiddleware）
+### 实现redux核心功能（createStore, applyMiddleware, combineReducers）
 ---
 #### 开始之前，需要了解几个概念
 - **store**  
